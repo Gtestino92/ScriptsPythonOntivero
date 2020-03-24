@@ -1,6 +1,20 @@
 import pandas as pd
 file = open("ventas.xlsx", "rb")
 fileInfo = open("macetasInfo.xlsx", "rb")
+dictMeses = {
+  "enero": "01",
+  "febrero": "02",
+  "marzo": "03",
+  "abril": "04",
+  "mayo": "05",
+  "junio": "06",
+  "julio": "07",
+  "agosto": "08",
+  "septiembre": "09",
+  "octubre": "10",
+  "noviembre": "11",
+  "diciembre": "12"
+}
 
 dfs = pd.read_excel(file, header=1, sheet_name='Ventas AR')
 dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
@@ -40,8 +54,21 @@ for i, row in dfs.iterrows():
 
 dfs['codigoNew'] = pd.DataFrame(modelosList)
 
+dfs["fechaEntregaAux"] = dfs["Fecha de venta"].str.split(" de ", n = 3, expand = False)
+
+fechasEntregaList = []
+for i, value in dfs["fechaEntregaAux"].iteritems():
+    dia = value[0] if (len(value[0]) == 2) else ("0" + value[0])
+    mes = dictMeses[value[1]]
+    anio = value[2][:4]
+    fechasEntregaList.append(dia + "/" + mes + "/" + anio)
+
+dfs['fechaEntrega'] = pd.DataFrame(fechasEntregaList)
+
+print(dfs["fechaEntrega"])
+
 dfs = dfs[["nombre", "codigoNew",
-    "Estado", "Fecha de venta", "Descripción del estado", 
+    "Estado", "fechaEntrega", "Descripción del estado", 
     "Unidades", "Ingresos (ARS)"]]
 
 dfs.to_excel("fileOutput.xlsx")  
