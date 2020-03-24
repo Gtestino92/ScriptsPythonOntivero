@@ -65,7 +65,8 @@ for i, value in dfs["fechaEntregaAux"].iteritems():
 
 dfs['fechaEntrega'] = pd.DataFrame(fechasEntregaList)
 
-print(dfs["fechaEntrega"])
+dfs.drop(dfs[ dfs['Estado'] == "Venta cancelada" ].index, inplace=True)
+dfs.drop(dfs[ dfs['Estado'] == "Cancelaste la venta" ].index, inplace=True)
 
 dfs = dfs[["nombre", "codigoNew",
     "Estado", "fechaEntrega", "Descripción del estado", 
