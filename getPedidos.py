@@ -69,20 +69,14 @@ dfs['codigoNew'] = pd.DataFrame(modelosList)
 dfs["fechaSolicitudAux"] = dfs["Fecha de venta"].str.split(" de ", n = 3, expand = False)
 
 fechasSolicitudList = []
-for i, value in dfs["fechaSolicitudAux"].iteritems():
+for i, row in dfs.iterrows():
+    value = row["fechaSolicitudAux"]
     dia = value[0] if (len(value[0]) == 2) else ("0" + value[0])
     mes = dictMeses[value[1]]
     anio = value[2][:4]
     fechasSolicitudList.append(dia + "/" + mes + "/" + anio)
 
 dfs['fechaSolicitud'] = pd.DataFrame(fechasSolicitudList)
-
-
-## Tiro ventas canceladas y pendientes
-
-dfs.drop(dfs[ dfs['Estado'] == "Venta cancelada" ].index, inplace=True)
-dfs.drop(dfs[ dfs['Estado'] == "Cancelaste la venta" ].index, inplace=True)
-dfs.drop(dfs[ dfs['Estado'] == "Esperando disponibilidad de stock" ].index, inplace=True)
 
 
 ## Obtengo fecha de Entrega
@@ -112,14 +106,17 @@ for i, row in dfs.iterrows():
         fechaEntrega = getFechaByArribo(row["Descripción del estado"], row["fechaSolicitud"])
     elif(estado=="Venta concretada"):
         fechaEntrega = getFechaPasadoUnMes(row["fechaSolicitud"])
-        print(fechaEntrega)
     fechasEntregaList.append(fechaEntrega)
 
 dfs['fechaEntrega'] = pd.DataFrame(fechasEntregaList)
 
-dfs = dfs[["nombre", "codigoNew",
-    "Estado", "fechaSolicitud", "fechaEntrega", "Descripción del estado", 
-    "Unidades", "Ingresos (ARS)"]]
+dfs.drop(dfs[dfs["fechaEntrega"] == ""].index, axis=0, inplace=True)
+
+
+
+# Output
+dfs = dfs[["nombre", "codigoNew", "Estado", "fechaSolicitud", "fechaEntrega", "Unidades", "Ingresos (ARS)"]]
+
 
 dfs.to_excel("fileOutput.xlsx")  
 
