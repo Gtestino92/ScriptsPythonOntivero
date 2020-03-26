@@ -21,7 +21,7 @@ dictMeses = {
 
 ## Leo archivos
 
-dfs = pd.read_excel(file, header=1, sheet_name='Ventas AR')
+dfs = pd.read_excel(file, header=1, sheet_name='Ventas AR', encoding="ascii")
 dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
 
 dfs = dfs[["Nombre del comprador", "Apellido del comprador", "Título de la publicación",
@@ -113,12 +113,15 @@ dfs['fechaEntrega'] = pd.DataFrame(fechasEntregaList)
 dfs.drop(dfs[dfs["fechaEntrega"] == ""].index, axis=0, inplace=True)
 
 
-
 # Output
-dfs = dfs[["nombre", "codigoNew", "Estado", "fechaSolicitud", "fechaEntrega", "Unidades", "Ingresos (ARS)"]]
+dfs = dfs[["nombre", "codigoNew", "fechaSolicitud", "fechaEntrega", "Unidades", "Ingresos (ARS)"]]
 
 
 dfs.to_excel("fileOutput.xlsx")  
+
+
+# Paso a string JSON
+print(dfs.to_json(orient = "records"))
 
 file.close()
 
