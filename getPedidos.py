@@ -1,7 +1,9 @@
-def getPedidos():
-    import pandas as pd
-    import datetime
+import json
+import pandas as pd
+import datetime
 
+def getPedidos():
+    
     file = open("ventas.xlsx", "rb")
     fileInfo = open("macetasInfo.xlsx", "rb")
     dictMeses = {
@@ -137,5 +139,6 @@ def getPedidos():
     file.close()
 
     # Paso a string JSON
-    return dfs.to_json(orient = "records")
+    return dfs.to_json(orient = "records").replace("\/","/")
 
+print(json.dumps(getPedidos(), indent=True))
