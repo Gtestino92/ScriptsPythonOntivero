@@ -2,9 +2,8 @@ import json
 import pandas as pd
 import datetime
 
-def getPedidos():
+def makePedidosFromXlsx(file):
     
-    file = open("ventas.xlsx", "rb")
     fileInfo = open("macetasInfo.xlsx", "rb")
     dictMeses = {
     "enero": "01",
@@ -140,8 +139,6 @@ def getPedidos():
     dfs.to_excel("fileOutput.xlsx")  
 
     file.close()
-
+    fileInfo.close()
     # Paso a string JSON
     return dfs.to_json(orient = "records").replace("\/","/")
-
-print(getPedidos())
