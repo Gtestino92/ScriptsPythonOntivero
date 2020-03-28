@@ -43,6 +43,7 @@ def getPedidos():
             ("í", "i"),
             ("ó", "o"),
             ("ú", "u"),
+            ("ñ", "n")
         )
         for a, b in replacements:
             s = s.replace(a, b).replace(a.upper(), b.upper())
@@ -129,10 +130,12 @@ def getPedidos():
 
     dfs.drop(dfs[dfs["fechaEntrega"] == ""].index, axis=0, inplace=True)
 
+    # Renombro columnas
+    dfs["total"] = dfs["Ingresos (ARS)"] 
+    dfs["cantidad"] = dfs["Unidades"]
 
     # Output
-    dfs = dfs[["nombre", "codigoNew", "fechaSolicitud", "fechaEntrega", "Unidades", "Ingresos (ARS)"]]
-
+    dfs = dfs[["nombre", "codigoNew", "fechaSolicitud", "fechaEntrega", "cantidad", "total"]]
 
     dfs.to_excel("fileOutput.xlsx")  
 
@@ -141,4 +144,4 @@ def getPedidos():
     # Paso a string JSON
     return dfs.to_json(orient = "records").replace("\/","/")
 
-print(json.dumps(getPedidos(), indent=True))
+print(getPedidos())
