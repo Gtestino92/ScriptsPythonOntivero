@@ -64,7 +64,7 @@ def makePedidosFromXlsx(file):
     dfAux = pd.DataFrame(frame)
 
     dfs.loc[dfs["titulo"].isnull(), "titulo"] = dfAux["Título de la publicación"].str.split("- ", n = 2, expand = True)[2]
-
+    
     serieAux2 = dfs.loc[dfs["titulo"].isnull(), "Título de la publicación"]
     frame2 = {'Título de la publicación': serieAux2 } 
     dfAux2 = pd.DataFrame(frame2)
@@ -79,7 +79,6 @@ def makePedidosFromXlsx(file):
         modelosList.append(value)
 
     dfs['codigoNew'] = pd.DataFrame(modelosList)
-
 
     ## Obtengo fechaSolicitud
 
@@ -126,12 +125,22 @@ def makePedidosFromXlsx(file):
         fechasEntregaList.append(fechaEntrega)
 
     dfs['fechaEntrega'] = pd.DataFrame(fechasEntregaList)
-
     dfs.drop(dfs[dfs["fechaEntrega"] == ""].index, axis=0, inplace=True)
-
+    dfs = dfs.reset_index(drop=True) ##reseteo indices luego del drop
+    
     # Renombro columnas
-    dfs["total"] = dfs["Ingresos (ARS)"] 
+    dfs["totalAux"] = dfs["Ingresos (ARS)"] 
     dfs["cantidad"] = dfs["Unidades"]
+
+    # Saco el punto "." de la columna de totales
+    totalList = []
+    for i, row in dfs.iterrows():
+        value = row["totalAux"]
+        ##totalList.append(str(int(round(float(value.replace(".","").replace(",","."))))))
+        res = str(int(round(float(value.replace(".","").replace(",",".")))))
+        totalList.append(res)
+
+    dfs['total'] = pd.DataFrame(totalList)
 
     # Output
     dfs = dfs[["nombre", "codigoNew", "fechaSolicitud", "fechaEntrega", "cantidad", "total"]]
