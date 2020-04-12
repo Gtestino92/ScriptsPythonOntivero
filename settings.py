@@ -1,0 +1,1 @@
+MONGO_URI = 'mongodb+srv://ontiveroUser:federer92@cluster0-tvgnx.gcp.mongodb.net/pedidos_ontivero?retryWrites=true&w=majority'
