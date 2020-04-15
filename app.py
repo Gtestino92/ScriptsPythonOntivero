@@ -22,10 +22,10 @@ def pedidosEntregadosML():
 
 @app.route("/getPedidosEntregadosDb", methods = ['GET'])
 def getPedidosEntregadosDb():
-    try:
+    #try:
         return str(getPedidosEntregados())
-    except(Exception):
-        return Response(status=400)
+    #except(Exception):
+    #   return Response(status=400)
 
 if(__name__ == "__main__"):
     app.run(debug=True, port=4000) 
