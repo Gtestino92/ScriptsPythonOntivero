@@ -1,5 +1,6 @@
 from mongoConnection import mongo
 import pandas as pd
+import numpy as np
 
 def getPedidosEntregados():
     ontiveroDb = mongo.db
@@ -9,14 +10,20 @@ def getPedidosEntregados():
     dfPedidosFull.dropna(inplace=True)
     dfPedidosFull.to_excel("fileOutput.xlsx")  
     formatDict = getFormatDict()
-    print(formatDict["001"].formato)
-    return []
+    formatDict["fecha"] = np.nan
+    dfPedidosTransp = dfPedidosFull.T
+    dfAux = pd.DataFrame(dfPedidosTransp.index.values)
+    dfAux.columns = ['values']
+    print(dfAux["values"].apply(lambda x: formatDict[x]))
+    dfPedidosTransp["formato"] = dfAux["values"].apply(lambda x: formatDict[x])
+    print(dfPedidosTransp)
+    return [] 
 
 def getFormatDict():
     fileInfo = open("macetasInfo.xlsx", "rb")
     dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
     dfsInfo = dfsInfo[["codigo nuevo","formato"]]
-    dfsInfo.set_index("codigo nuevo", inplace = True)
+    dfsInfo.set_index("codigo nuevo", inplace = True) 
     return dfsInfo.T.to_dict('series')
 
 def getFechas(db):
