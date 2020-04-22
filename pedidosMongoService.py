@@ -10,12 +10,17 @@ def getPedidosEntregados():
     dfPedidosFull.dropna(inplace=True)
     dfPedidosFull.to_excel("fileOutput.xlsx")  
     formatDict = getFormatDict()
-    formatDict["fecha"] = np.nan
+    
     dfPedidosTransp = dfPedidosFull.T
+    rowFechas = dfPedidosFull.iloc[:,-1]
+    dfPedidosTransp.drop(dfPedidosTransp.tail(1).index, inplace = True)
+    
     dfAux = pd.DataFrame(dfPedidosTransp.index.values)
     dfAux.columns = ['values']
-    print(dfAux["values"].apply(lambda x: formatDict[x]))
-    dfPedidosTransp["formato"] = dfAux["values"].apply(lambda x: formatDict[x])
+    dfAux2 = pd.DataFrame(dfAux["values"].apply(lambda x: formatDict[x]))
+    dfAux2 = dfAux2.set_index(dfPedidosTransp.index)
+    print()
+    dfPedidosTransp["formato"] = dfAux2
     print(dfPedidosTransp)
     return [] 
 
