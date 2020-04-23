@@ -21,7 +21,8 @@ def getPedidosEntregados():
     dfAux2 = dfAux2.set_index(dfPedidosTransp.index)
     print()
     dfPedidosTransp["formato"] = dfAux2
-    print(dfPedidosTransp)
+    dfPedidosTransp.to_excel("transp.xlsx")
+    dfPedidosTransp.groupby('formato').sum().to_excel("transpByFormato.xlsx")
     return [] 
 
 def getFormatDict():
