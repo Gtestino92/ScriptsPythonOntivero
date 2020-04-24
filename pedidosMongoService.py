@@ -1,6 +1,7 @@
 from mongoConnection import mongo
 import pandas as pd
 import numpy as np
+from matplotlib import pyplot as plt
 
 def getPedidosEntregados():
     ontiveroDb = mongo.db
@@ -19,10 +20,17 @@ def getPedidosEntregados():
     dfAux.columns = ['values']
     dfAux2 = pd.DataFrame(dfAux["values"].apply(lambda x: formatDict[x]))
     dfAux2 = dfAux2.set_index(dfPedidosTransp.index)
-    print()
     dfPedidosTransp["formato"] = dfAux2
+    dfPedidosTransp["fecha"] = pd.DataFrame(rowFechas)
     dfPedidosTransp.to_excel("transp.xlsx")
-    dfPedidosTransp.groupby('formato').sum().to_excel("transpByFormato.xlsx")
+    dfPedidosFormato = dfPedidosTransp.groupby('formato').sum().T
+    dfFechas = pd.DataFrame(rowFechas)
+    dfFechas.columns = ['fecha']
+    dfPedidosFormato["fecha"] = pd.to_datetime(dfFechas['fecha'], format="%d/%m/%Y")
+    dfPedidosFormato.set_index("fecha", inplace=True)
+    plt.figure(figsize=(10,4))
+    plt.plot(dfPedidosFormato["OVA"])
+    dfPedidosFormato.to_excel("transpByFormato.xlsx")
     return [] 
 
 def getFormatDict():
