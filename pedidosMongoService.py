@@ -7,15 +7,19 @@ def getPedidosEntregados():
     ontiveroDb = mongo.db
     dfPedidosFecha = getFechas(ontiveroDb)
     dfPedidos = getPedidos(ontiveroDb)
+    dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha)
+    plt.figure(figsize=(10,4))
+    plt.plot(dfPedidosByFormato["OVA"])
+    dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
+    return [] 
+
+def getPedidosByFormato(dfPedidos, dfPedidosFecha):
     dfPedidosFull = pd.merge(left=dfPedidos, right=dfPedidosFecha, how='left', left_index=True, right_index=True)
     dfPedidosFull.dropna(inplace=True)
-    dfPedidosFull.to_excel("fileOutput.xlsx")  
     formatDict = getFormatDict()
-    
     dfPedidosTransp = dfPedidosFull.T
     rowFechas = dfPedidosFull.iloc[:,-1]
     dfPedidosTransp.drop(dfPedidosTransp.tail(1).index, inplace = True)
-    
     dfAux = pd.DataFrame(dfPedidosTransp.index.values)
     dfAux.columns = ['values']
     dfAux2 = pd.DataFrame(dfAux["values"].apply(lambda x: formatDict[x]))
@@ -27,12 +31,12 @@ def getPedidosEntregados():
     dfFechas = pd.DataFrame(rowFechas)
     dfFechas.columns = ['fecha']
     dfPedidosFormato["fecha"] = pd.to_datetime(dfFechas['fecha'], format="%d/%m/%Y")
-    dfPedidosFormato.set_index("fecha", inplace=True)
-    plt.figure(figsize=(10,4))
-    plt.plot(dfPedidosFormato["OVA"])
-    dfPedidosFormato.to_excel("transpByFormato.xlsx")
-    return [] 
-
+    dfPedidosFormato.to_excel("beforeGroupFecha.xlsx")
+    dfPedidosFormato = dfPedidosFormato.groupby('fecha').sum()
+    dfPedidosFormato.dropna(inplace=True)
+    print(dfPedidosFormato)
+    return dfPedidosFormato
+    
 def getFormatDict():
     fileInfo = open("macetasInfo.xlsx", "rb")
     dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
