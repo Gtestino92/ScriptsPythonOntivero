@@ -8,9 +8,18 @@ def getPedidosEntregados():
     dfPedidosFecha = getFechas(ontiveroDb)
     dfPedidos = getPedidos(ontiveroDb)
     dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha)
+
     plt.figure(figsize=(10,4))
-    plt.plot(dfPedidosByFormato["OVA"])
+    
     dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
+    
+    dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
+    print(dfPedidosByFormato["BSQ"].sum())
+    print(dfPedidosByTrimestre["BSQ"].sum())
+    plt.plot(dfPedidosByFormato["BSQ"])
+    plt.plot(dfPedidosByTrimestre["BSQ"])
+    plt.show()
+    dfPedidosByTrimestre.to_excel('pedidosByMes.xlsx')
     return [] 
 
 def getPedidosByFormato(dfPedidos, dfPedidosFecha):
@@ -34,7 +43,6 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha):
     dfPedidosFormato.to_excel("beforeGroupFecha.xlsx")
     dfPedidosFormato = dfPedidosFormato.groupby('fecha').sum()
     dfPedidosFormato.dropna(inplace=True)
-    print(dfPedidosFormato)
     return dfPedidosFormato
     
 def getFormatDict():
