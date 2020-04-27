@@ -7,25 +7,24 @@ def getPedidosEntregados():
     ontiveroDb = mongo.db
     dfPedidosFecha = getFechas(ontiveroDb)
     dfPedidos = getPedidos(ontiveroDb)
-    dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha)
+    formatByCod = getFormatByCod()
+    dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha, formatByCod)
 
     plt.figure(figsize=(10,4))
-    
+    listFormatos = pd.DataFrame(formatByCod).T.formato.unique()
     dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
-    
+
     dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
-    print(dfPedidosByFormato["BSQ"].sum())
-    print(dfPedidosByTrimestre["BSQ"].sum())
-    plt.plot(dfPedidosByFormato["BSQ"])
-    plt.plot(dfPedidosByTrimestre["BSQ"])
+    for formato in listFormatos:
+        plt.plot(dfPedidosByTrimestre[formato])
     plt.show()
     dfPedidosByTrimestre.to_excel('pedidosByMes.xlsx')
     return [] 
 
-def getPedidosByFormato(dfPedidos, dfPedidosFecha):
+def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfPedidosFull = pd.merge(left=dfPedidos, right=dfPedidosFecha, how='left', left_index=True, right_index=True)
     dfPedidosFull.dropna(inplace=True)
-    formatDict = getFormatDict()
+    
     dfPedidosTransp = dfPedidosFull.T
     rowFechas = dfPedidosFull.iloc[:,-1]
     dfPedidosTransp.drop(dfPedidosTransp.tail(1).index, inplace = True)
@@ -45,7 +44,7 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha):
     dfPedidosFormato.dropna(inplace=True)
     return dfPedidosFormato
     
-def getFormatDict():
+def getFormatByCod():
     fileInfo = open("macetasInfo.xlsx", "rb")
     dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
     dfsInfo = dfsInfo[["codigo nuevo","formato"]]
