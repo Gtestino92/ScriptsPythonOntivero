@@ -1,7 +1,16 @@
 from mongoConnection import mongo
+from models.pedido import Pedido
+from models.maceta import Maceta
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
+
+def getListRecomOrderByProb(pedidoSolicitado):
+    ontiveroDb = mongo.db
+    pedidos = ontiveroDb['pedidos']
+    listPedidos = []
+    # hacer query sobre pedidos obteniendo los que tengan alguno de los codigos del pedidoSolicitado
+    return ""
 
 def getPedidosEntregados():
     ontiveroDb = mongo.db
@@ -15,8 +24,12 @@ def getPedidosEntregados():
     dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
 
     dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
+    print(dfPedidosByTrimestre.index)
+    print(pd.infer_freq(dfPedidosByTrimestre.index))
     for formato in listFormatos:
         plt.plot(dfPedidosByTrimestre[formato])
+        
+    plt.legend(listFormatos)
     plt.show()
     dfPedidosByTrimestre.to_excel('pedidosByMes.xlsx')
     return [] 
