@@ -8,6 +8,14 @@ MAX_ITER = 100
 MIN_DIST = 0.1
 GRAF_STEP = 10
 
+def getProbCompraEstimation(hVals,yVec,xVals):
+    n = hVals.shape[0]
+    d = hVals.shape[1] + 1
+    wVecInit = np.matrix(np.zeros(d)).reshape(-1,1)
+    A = getAMatrix(hVals)
+    wVecOpt = getOptwVec(A,yVec,hVals,wVecInit,n)
+    return alfaVal(wVecOpt,getxVec(xVals))
+
 def alfaVal(wVec, xVec):
     return 1/(1 + math.exp(-(wVec.T*xVec).item()))
 
@@ -64,14 +72,6 @@ def calcLikelihood(alfaVec, yVec):
         y = yVec[i].item()
         likelihood *= math.pow(alfa,y) * math.pow((1-alfa), (1-y))
     return likelihood
-
-def getProbCompraEstimation(hVals,yVec,xVals):
-    n = hVals.shape[0]
-    d = hVals.shape[1] + 1
-    wVecInit = np.matrix(np.zeros(d)).reshape(-1,1)
-    A = getAMatrix(hVals)
-    wVecOpt = getOptwVec(A,yVec,hVals,wVecInit,n)
-    return alfaVal(wVecOpt,getxVec(xVals))
 
 hVals1A = np.transpose(np.matrix([[1, 60, 20, 30, 80, 50, 50, 40, 30, 20, 10, 30, 100, 120, 140, 100, 20, 10]]))
 

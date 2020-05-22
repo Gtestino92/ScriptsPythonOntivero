@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Response
+import traceback
 from models.pedido import Pedido
 from models.maceta import Maceta
 from resultPedidosMlibreMock import pedidos
@@ -34,15 +35,18 @@ def getCodigosRecomendacion():
     try:
         pedido = makePedidoByRequest(request)
         return str(getListRecomOrderByProb(pedido))
-    except(Exception):
-       return Response(status=400)
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
+        return Response(status=400)
 
 def makePedidoByRequest(request):
     listadoMacetas = []
-    for i in range(len(int(request.data("cantModelos")))):
-        codigo = request.data("codigoNew" + i)
-        cantSolicitada = int(request.data("cantSolicitada" + i))
-        listadoMacetas.append(Maceta(codigo,cantSolicitada))
+    for i in range(int(request.form["cantModelos"])):
+        codigo = request.form["codigoNew" + str(i)]
+        cantSolicitada = int(request.form["cantSolicitada" + str(i)])
+        maceta = Maceta(codigo,cantSolicitada) 
+        listadoMacetas.append(maceta)
     return Pedido(listadoMacetas,"")
      
 

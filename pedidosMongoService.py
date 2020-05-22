@@ -1,16 +1,25 @@
 from mongoConnection import mongo
+from pymongo import MongoClient
 from models.pedido import Pedido
 from models.maceta import Maceta
 import pandas as pd
 import numpy as np
+import re
 from matplotlib import pyplot as plt
+from ml.logRegGradDesc import getProbCompraEstimation
 
 def getListRecomOrderByProb(pedidoSolicitado):
     ontiveroDb = mongo.db
     pedidos = ontiveroDb['pedidos']
     listPedidos = []
-    # hacer query sobre pedidos obteniendo los que tengan alguno de los codigos del pedidoSolicitado
-    return ""
+    for i in range(len(pedidoSolicitado.listadoMacetas)):
+        query = { pedidoSolicitado.listadoMacetas[i].codigo : { "$exists": True } } 
+        listPedidos.append(list(pedidos.find(query)))
+    # sacar repeticiones (mismo idPedido)
+    # armar hVals, yVec y xVals para estimar prob 
+    # para cada modelo que no esté en pedidoSolicitado
+
+    return listPedidos
 
 def getPedidosEntregados():
     ontiveroDb = mongo.db
