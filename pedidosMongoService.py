@@ -11,10 +11,10 @@ from ml.logRegGradDesc import getProbCompraEstimation
 def getListRecomOrderByProb(pedidoSolicitado):
     ontiveroDb = mongo.db
     pedidos = ontiveroDb['pedidos']
-    listPedidos = []
+    query = {"$or": []}
     for i in range(len(pedidoSolicitado.listadoMacetas)):
-        query = { pedidoSolicitado.listadoMacetas[i].codigo : { "$exists": True } } 
-        listPedidos.append(list(pedidos.find(query)))
+        query["$or"].append({pedidoSolicitado.listadoMacetas[i].codigo : { "$exists": True }})
+    listPedidos = list(pedidos.find(query))
     # sacar repeticiones (mismo idPedido)
     # armar hVals, yVec y xVals para estimar prob 
     # para cada modelo que no esté en pedidoSolicitado
