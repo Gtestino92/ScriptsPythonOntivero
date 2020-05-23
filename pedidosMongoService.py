@@ -28,24 +28,28 @@ def getListRecomOrderByProb(pedidoSolicitado):
     ## para cada uno busco la prob y armo otra columna en el df
     probsList = []
     hVals = getHMatrix(pedidoSolicitado.listadoMacetas,listPedidos)
-    print(hVals)
-    #for i, row in dfsProbByCod.iterrows():
-    #    codNew = row["codigoNew"]
-    #    yVec = getYVec(codNew,listPedidos)
-    #    xVals = getXVals(codNew,pedidoSolicitado)
-    #    prob = getProbCompraEstimation(hVals,yVec,xVals)
-    #    probsList.append(prob)
+    xVals = getXVals(pedidoSolicitado)
+    for i, row in dfsProbByCod.iterrows():
+        codNew = row["codigoNew"]
+        yVec = getYVec(codNew,listPedidos)
+        if(yVec.sum()==0):
+            prob = 0
+        elif(yVec.sum()==len(yVec)):
+            prob = 1
+        else:
+            prob = getProbCompraEstimation(hVals,yVec,xVals)
+        probsList.append(prob)
 
-    #dfsProbByCod['probRec'] = pd.DataFrame(probsList)
+    dfsProbByCod['probRec'] = pd.DataFrame(probsList)
 
     ## ordeno el df y paso a lista los codigos
-
-    return probsList
+    dfsProbByCod.sort_values(by=['probRec'], inplace=True, ascending=False)
+    
+    return list(dfsProbByCod["codigoNew"])
 
 def getHMatrix(listadoMacetas,listPedidos):
     vecPedidosMat = []
     for pedido in listPedidos:
-        print(pedido)
         vecCantByModelo = []
         for maceta in listadoMacetas:
             cod = maceta.codigo
@@ -55,13 +59,23 @@ def getHMatrix(listadoMacetas,listPedidos):
                 cant=0
             vecCantByModelo.append(cant)
         vecPedidosMat.append(vecCantByModelo) 
-    return np.matrix(vecPedidosMat).T
+    return np.matrix(vecPedidosMat)
 
 def getYVec(codNew,listPedidos):
-    return ""
+    yVec = []
+    for pedido in listPedidos:
+        if(codNew in pedido):
+            value = 1
+        else:
+            value=0
+        yVec.append(value)
+    return np.matrix(yVec).T
 
-def getXVals(codNew,pedidoSolicitado):
-    return ""
+def getXVals(pedidoSolicitado):
+    xVals = []
+    for maceta in pedidoSolicitado.listadoMacetas:
+        xVals.append(maceta.cantidad)
+    return np.array(xVals)
     
 def getDfInfo():
     fileInfo = open("macetasInfo.xlsx", "rb")
