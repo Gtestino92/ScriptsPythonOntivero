@@ -15,11 +15,57 @@ def getListRecomOrderByProb(pedidoSolicitado):
     for i in range(len(pedidoSolicitado.listadoMacetas)):
         query["$or"].append({pedidoSolicitado.listadoMacetas[i].codigo : { "$exists": True }})
     listPedidos = list(pedidos.find(query))
-    # sacar repeticiones (mismo idPedido)
-    # armar hVals, yVec y xVals para estimar prob 
-    # para cada modelo que no esté en pedidoSolicitado
 
-    return listPedidos
+    ## obtengo lista codigos que no están en pedidoSolicitado (buscar excel)
+    dfsInfo = getDfInfo()
+    dfsProbByCod = dfsInfo[["codigo nuevo"]]
+    dfsProbByCod.columns = ["codigoNew"]
+
+    for maceta in pedidoSolicitado.listadoMacetas:
+        dfsProbByCod = dfsProbByCod.drop(dfsProbByCod[dfsProbByCod["codigoNew"]==maceta.codigo].index)
+    dfsProbByCod = dfsProbByCod.reset_index(drop=True) ##reseteo indices luego del drop
+
+    ## para cada uno busco la prob y armo otra columna en el df
+    probsList = []
+    hVals = getHMatrix(pedidoSolicitado.listadoMacetas,listPedidos)
+    print(hVals)
+    #for i, row in dfsProbByCod.iterrows():
+    #    codNew = row["codigoNew"]
+    #    yVec = getYVec(codNew,listPedidos)
+    #    xVals = getXVals(codNew,pedidoSolicitado)
+    #    prob = getProbCompraEstimation(hVals,yVec,xVals)
+    #    probsList.append(prob)
+
+    #dfsProbByCod['probRec'] = pd.DataFrame(probsList)
+
+    ## ordeno el df y paso a lista los codigos
+
+    return probsList
+
+def getHMatrix(listadoMacetas,listPedidos):
+    vecPedidosMat = []
+    for pedido in listPedidos:
+        print(pedido)
+        vecCantByModelo = []
+        for maceta in listadoMacetas:
+            cod = maceta.codigo
+            if(cod in pedido):
+                cant = pedido[cod]
+            else:
+                cant=0
+            vecCantByModelo.append(cant)
+        vecPedidosMat.append(vecCantByModelo) 
+    return np.matrix(vecPedidosMat).T
+
+def getYVec(codNew,listPedidos):
+    return ""
+
+def getXVals(codNew,pedidoSolicitado):
+    return ""
+    
+def getDfInfo():
+    fileInfo = open("macetasInfo.xlsx", "rb")
+    return pd.read_excel(fileInfo, header=0, sheet_name='info')
 
 def getPedidosEntregados():
     ontiveroDb = mongo.db
@@ -67,8 +113,7 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     return dfPedidosFormato
     
 def getFormatByCod():
-    fileInfo = open("macetasInfo.xlsx", "rb")
-    dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
+    dfsInfo = getDfInfo()
     dfsInfo = dfsInfo[["codigo nuevo","formato"]]
     dfsInfo.set_index("codigo nuevo", inplace = True) 
     return dfsInfo.T.to_dict('series')
