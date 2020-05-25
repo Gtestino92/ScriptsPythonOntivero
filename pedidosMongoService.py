@@ -44,8 +44,7 @@ def getListRecomOrderByProb(pedidoSolicitado):
 
     ## ordeno el df y paso a lista los codigos
     dfsProbByCod.sort_values(by=['probRec'], inplace=True, ascending=False)
-    
-    return list(dfsProbByCod["codigoNew"])
+    return dfsProbByCod["codigoNew"].to_json(orient = "records")
 
 def getHMatrix(listadoMacetas,listPedidos):
     vecPedidosMat = []
