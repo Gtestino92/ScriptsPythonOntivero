@@ -2,8 +2,7 @@ import json
 import pandas as pd
 import datetime
 
-def makePedidosFromXlsx(file):
-    
+def makePedidosFromXlsx(file, codigosMacetas):
     fileInfo = open("macetasInfo.xlsx", "rb")
     dictMeses = {
     "enero": "01",

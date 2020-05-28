@@ -1,1 +1,7 @@
 MONGO_URI = 'mongodb+srv://ontiveroUser:federer92@cluster0-tvgnx.gcp.mongodb.net/pedidos_ontivero?retryWrites=true&w=majority'
+MYSQL_USER = 'b9a76572e37a19'
+MYSQL_DB = 'heroku_293de090bbefa38'
+MYSQL_PASSWORD = 'e1ee1d23acb910d'
+#MYSQL_URL = 'jdbc:mysql://b9a76572e37a19:e1ee1d23acb910d@us-cdbr-iron-east-04.cleardb.net/heroku_293de090bbefa38?reconnect=true'
+MYSQL_HOST = 'us-cdbr-iron-east-04.cleardb.net'
+MYSQL_CURSORCLASS = 'DictCursor'
