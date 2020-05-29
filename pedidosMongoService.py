@@ -77,6 +77,7 @@ def getXVals(pedidoSolicitado):
     return np.array(xVals)
     
 def getDfInfo():
+    ## MODIFICAR PARA QUE CONSULTE A LISTA_MACETAS
     fileInfo = open("macetasInfo.xlsx", "rb")
     return pd.read_excel(fileInfo, header=0, sheet_name='info')
 

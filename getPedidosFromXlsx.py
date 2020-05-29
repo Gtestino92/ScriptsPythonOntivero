@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import datetime
 
-def makePedidosFromXlsx(file, codigosMacetas):
+def makePedidosFromXlsx(file, codigosMacetasMlibre):
     fileInfo = open("macetasInfo.xlsx", "rb")
     dictMeses = {
     "enero": "01",
@@ -23,7 +23,6 @@ def makePedidosFromXlsx(file, codigosMacetas):
     ## Leo archivos
 
     dfs = pd.read_excel(file, header=1, sheet_name='Ventas AR', encoding="ascii")
-    dfsInfo = pd.read_excel(fileInfo, header=0, sheet_name='info')
 
     dfs = dfs[["Nombre del comprador", "Apellido del comprador", "Título de la publicación",
         "Estado", "Fecha de venta", "Descripción del estado", 
@@ -73,9 +72,9 @@ def makePedidosFromXlsx(file, codigosMacetas):
     modelosList = []
     for i, row in dfs.iterrows():
         titulo = row["titulo"]
-        dfInfoAux = dfsInfo.loc[dfsInfo["Titulo"] == titulo, "codigo nuevo"]
-        value = dfInfoAux.values[0]
-        modelosList.append(value)
+        #dfInfoAux = dfsInfo.loc[dfsInfo["Titulo"] == titulo, "codigo nuevo"]
+        #value = dfInfoAux.values[0]
+        modelosList.append(codigosMacetasMlibre[titulo])
 
     dfs['codigoNew'] = pd.DataFrame(modelosList)
 
