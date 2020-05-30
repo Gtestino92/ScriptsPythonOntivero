@@ -8,17 +8,16 @@ import re
 from matplotlib import pyplot as plt
 from ml.logRegGradDesc import getProbCompraEstimation
 
-def getListRecomOrderByProb(pedidoSolicitado):
+def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
     ontiveroDb = mongo.db
     pedidos = ontiveroDb['pedidos']
     query = {"$or": []}
     for i in range(len(pedidoSolicitado.listadoMacetas)):
         query["$or"].append({pedidoSolicitado.listadoMacetas[i].codigo : { "$exists": True }})
     listPedidos = list(pedidos.find(query))
-
+    print(listPedidos)
     ## obtengo lista codigos que no están en pedidoSolicitado (buscar excel)
-    dfsInfo = getDfInfo()
-    dfsProbByCod = dfsInfo[["codigo nuevo"]]
+    dfsProbByCod = pd.DataFrame(list(formatoByCodigoDict))
     dfsProbByCod.columns = ["codigoNew"]
 
     for maceta in pedidoSolicitado.listadoMacetas:
@@ -76,25 +75,19 @@ def getXVals(pedidoSolicitado):
         xVals.append(maceta.cantidad)
     return np.array(xVals)
     
-def getDfInfo():
-    ## MODIFICAR PARA QUE CONSULTE A LISTA_MACETAS
-    fileInfo = open("macetasInfo.xlsx", "rb")
-    return pd.read_excel(fileInfo, header=0, sheet_name='info')
-
-def getPedidosEntregados():
+def getPedidosEntregados(formatoByCodigoDict):
     ontiveroDb = mongo.db
     dfPedidosFecha = getFechas(ontiveroDb)
     dfPedidos = getPedidos(ontiveroDb)
-    formatByCod = getFormatByCod()
-    dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha, formatByCod)
+
+    dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha, formatoByCodigoDict)
 
     plt.figure(figsize=(10,4))
-    listFormatos = pd.DataFrame(formatByCod).T.formato.unique()
+    listFormatos = pd.Series(list(formatoByCodigoDict.values())).unique()
     dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
 
     dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
-    print(dfPedidosByTrimestre.index)
-    print(pd.infer_freq(dfPedidosByTrimestre.index))
+
     for formato in listFormatos:
         plt.plot(dfPedidosByTrimestre[formato])
         
@@ -112,6 +105,7 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfPedidosTransp.drop(dfPedidosTransp.tail(1).index, inplace = True)
     dfAux = pd.DataFrame(dfPedidosTransp.index.values)
     dfAux.columns = ['values']
+
     dfAux2 = pd.DataFrame(dfAux["values"].apply(lambda x: formatDict[x]))
     dfAux2 = dfAux2.set_index(dfPedidosTransp.index)
     dfPedidosTransp["formato"] = dfAux2
@@ -126,12 +120,6 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfPedidosFormato.dropna(inplace=True)
     return dfPedidosFormato
     
-def getFormatByCod():
-    dfsInfo = getDfInfo()
-    dfsInfo = dfsInfo[["codigo nuevo","formato"]]
-    dfsInfo.set_index("codigo nuevo", inplace = True) 
-    return dfsInfo.T.to_dict('series')
-
 def getFechas(db):
     pedidosInfo = db['pedidos_info']
     listPedidosInfo = list(pedidosInfo.find({}))

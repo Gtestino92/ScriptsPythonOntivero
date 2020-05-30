@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, request, Response
 import traceback
+import pandas as pd
 from models.pedido import Pedido
 from models.maceta import Maceta
 from resultPedidosMlibreMock import pedidos
@@ -7,7 +8,7 @@ from getPedidosFromXlsx import makePedidosFromXlsx
 from pedidosMongoService import getPedidosEntregados,getListRecomOrderByProb
 from mongoConnection import mongo
 from flask_mysqldb import MySQL
-from macetasSqlService import getCodigoByTituloMlibre
+from macetasSqlService import getCodigoByTituloMlibre, getFormatoByCodigoNew
 
 def createAppOntivero(config_object='settings'):
     app = Flask(__name__)
@@ -33,15 +34,20 @@ def pedidosEntregadosML():
 @app.route("/getPedidosEntregadosDb", methods = ['GET'])
 def getPedidosEntregadosDb():
     try:
-        return str(getPedidosEntregados())
-    except Exception:
-       return Response(status=400)
+        formatoByCodigoDict = getFormatoByCodigoNew(mysql)
+        return str(getPedidosEntregados(formatoByCodigoDict))
+    except Exception as e:
+        traceback.print_tb(e.__traceback__)
+        print(e)
+        return Response(status=400)
+
 
 @app.route("/getRecomendaciones", methods = ['POST'])
 def getCodigosRecomendacion():
     try:
         pedido = makePedidoByRequest(request)
-        return str(getListRecomOrderByProb(pedido))
+        formatoByCodigoDict = getFormatoByCodigoNew(mysql)
+        return str(getListRecomOrderByProb(pedido,formatoByCodigoDict))
     except Exception as e:
         traceback.print_tb(e.__traceback__)
         print(e)
@@ -49,19 +55,12 @@ def getCodigosRecomendacion():
 
 @app.route("/connectMySql", methods = ['GET'])
 def checkConnection():
-    cur = mysql.connection.cursor()
-    cur.execute('''SELECT nombre_publicacion, codigo_nuevo FROM codigos_mlibre''')
-    result = cur.fetchall()
-    sqlResult = resultSQLToDict(result)
-    return str(sqlResult)
-    
-def resultSQLToDict(sqlRes):
-    #{k:v for t in a for k,v in t.items()}
-    return {elem['nombre_publicacion']:elem['codigo_nuevo'] for elem in sqlRes}
-    
-
-
-
+    formatoByCodigoDict = getFormatoByCodigoNew(mysql)
+    formatos = formatoByCodigoDict.values()
+    print(formatos)
+    print(pd.Series(list(formatos)).unique())
+    return str("")
+   
 def makePedidoByRequest(request):
     listadoMacetas = []
     for i in range(int(request.form["cantModelos"])):

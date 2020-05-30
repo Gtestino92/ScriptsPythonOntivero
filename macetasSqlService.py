@@ -1,11 +1,19 @@
 
 def getCodigoByTituloMlibre(mysql):
-    cur = mysql.connection.cursor()
-    cur.execute('''SELECT nombre_publicacion, codigo_nuevo FROM codigos_mlibre''')
-    result = cur.fetchall()
-    return resultSQLToDict(result)
+    query = '''SELECT nombre_publicacion, codigo_nuevo FROM codigos_mlibre'''
+    result = executeSelect(mysql,query)
+    return resultSQLToDict(result, 'nombre_publicacion', 'codigo_nuevo')
 
-def resultSQLToDict(sqlRes):
-    #{k:v for t in a for k,v in t.items()}
-    return {elem['nombre_publicacion']:elem['codigo_nuevo'] for elem in sqlRes}
+def getFormatoByCodigoNew(mysql):
+    query = '''SELECT codigo_nuevo, formato FROM lista_macetas WHERE estado="A"'''
+    result = executeSelect(mysql,query)
+    return resultSQLToDict(result, 'codigo_nuevo', 'formato')
+
+def executeSelect(sqlConn, query):
+    cur = sqlConn.connection.cursor()
+    cur.execute(query)
+    return cur.fetchall()
+
+def resultSQLToDict(sqlRes, key, value):
+    return {elem[key]:elem[value] for elem in sqlRes}
    
