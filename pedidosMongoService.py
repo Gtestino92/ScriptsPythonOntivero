@@ -10,13 +10,17 @@ from ml.logRegGradDesc import getProbCompraEstimation
 
 def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
     ontiveroDb = mongo.db
-    pedidos = ontiveroDb['pedidos']
+    pedidosCollection = ontiveroDb['pedidos']
+
+    codigosConPedidosRegistrados = getCodigosConPedidos(pedidoSolicitado.listadoMacetas,pedidosCollection)
+    if(len(codigosConPedidosRegistrados) == 0):
+        return []
     query = {"$or": []}
-    for i in range(len(pedidoSolicitado.listadoMacetas)):
-        query["$or"].append({pedidoSolicitado.listadoMacetas[i].codigo : { "$exists": True }})
-    listPedidos = list(pedidos.find(query))
-    print(listPedidos)
-    ## obtengo lista codigos que no están en pedidoSolicitado (buscar excel)
+    for codNew in codigosConPedidosRegistrados:
+        query["$or"].append({codNew : { "$exists": True }})
+    listPedidos = list(pedidosCollection.find(query))
+    
+    ## obtengo lista codigos que no están en pedidoSolicitado
     dfsProbByCod = pd.DataFrame(list(formatoByCodigoDict))
     dfsProbByCod.columns = ["codigoNew"]
 
@@ -26,9 +30,11 @@ def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
 
     ## para cada uno busco la prob y armo otra columna en el df
     probsList = []
-    hVals = getHMatrix(pedidoSolicitado.listadoMacetas,listPedidos)
-    xVals = getXVals(pedidoSolicitado)
+    hVals = getHMatrix(codigosConPedidosRegistrados,listPedidos)
+    xVals = getXVals(pedidoSolicitado, codigosConPedidosRegistrados)
+    #try:
     for i, row in dfsProbByCod.iterrows():
+        i=i
         codNew = row["codigoNew"]
         yVec = getYVec(codNew,listPedidos)
         if(yVec.sum()==0):
@@ -38,19 +44,34 @@ def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
         else:
             prob = getProbCompraEstimation(hVals,yVec,xVals)
         probsList.append(prob)
-
+    #except Exception as e:
+    #    e = e
+    #    return "NO"
+    
     dfsProbByCod['probRec'] = pd.DataFrame(probsList)
-
+    print(dfsProbByCod)
     ## ordeno el df y paso a lista los codigos
     dfsProbByCod.sort_values(by=['probRec'], inplace=True, ascending=False)
     return dfsProbByCod["codigoNew"].to_json(orient = "records")
 
-def getHMatrix(listadoMacetas,listPedidos):
+    #return "OK"
+
+def getCodigosConPedidos(listMacetas, pedidosCollection):
+    listCodigosConPedidos = []
+    for maceta in listMacetas:
+        codNew = maceta.codigo
+        query = {codNew : { "$exists": True }}
+        listPedidos = list(pedidosCollection.find(query))
+        if(len(listPedidos)>0):
+            listCodigosConPedidos.append(codNew)
+    return listCodigosConPedidos
+
+
+def getHMatrix(listCodigos,listPedidos):
     vecPedidosMat = []
     for pedido in listPedidos:
         vecCantByModelo = []
-        for maceta in listadoMacetas:
-            cod = maceta.codigo
+        for cod in listCodigos:
             if(cod in pedido):
                 cant = pedido[cod]
             else:
@@ -69,10 +90,11 @@ def getYVec(codNew,listPedidos):
         yVec.append(value)
     return np.matrix(yVec).T
 
-def getXVals(pedidoSolicitado):
+def getXVals(pedidoSolicitado, codigosConPedidos):
     xVals = []
     for maceta in pedidoSolicitado.listadoMacetas:
-        xVals.append(maceta.cantidad)
+        if(maceta.codigo in codigosConPedidos):
+            xVals.append(maceta.cantidad)
     return np.array(xVals)
     
 def getPedidosEntregados(formatoByCodigoDict):
