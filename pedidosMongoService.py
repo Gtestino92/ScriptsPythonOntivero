@@ -44,17 +44,13 @@ def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
         else:
             prob = getProbCompraEstimation(hVals,yVec,xVals)
         probsList.append(prob)
-    #except Exception as e:
-    #    e = e
-    #    return "NO"
     
     dfsProbByCod['probRec'] = pd.DataFrame(probsList)
-    print(dfsProbByCod)
+
     ## ordeno el df y paso a lista los codigos
     dfsProbByCod.sort_values(by=['probRec'], inplace=True, ascending=False)
     return dfsProbByCod["codigoNew"].to_json(orient = "records")
 
-    #return "OK"
 
 def getCodigosConPedidos(listMacetas, pedidosCollection):
     listCodigosConPedidos = []
