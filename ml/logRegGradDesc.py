@@ -1,7 +1,5 @@
 import numpy as np
 import math
-from matplotlib import pyplot as plt
-from matplotlib import cm
 import time
 
 MAX_ITER = 100
