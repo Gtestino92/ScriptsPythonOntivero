@@ -7,4 +7,3 @@ def getPedidosEntregados():
     return dfPedidos
 
 dfPedidos = getPedidosEntregados()
-print(dfPedidos.head())

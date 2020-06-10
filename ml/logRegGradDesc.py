@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import time
+from exceptions.singularMatException import SingularMatException
 
 MAX_ITER = 100
 MIN_DIST = 0.1
@@ -11,6 +12,8 @@ def getProbCompraEstimation(hVals,yVec,xVals):
     d = hVals.shape[1] + 1
     wVecInit = np.matrix(np.zeros(d)).reshape(-1,1)
     A = getAMatrix(hVals)
+    if(np.linalg.matrix_rank(A) != d):
+        raise SingularMatException(406)
     wVecOpt = getOptwVec(A,yVec,hVals,wVecInit,n)
     return alfaVal(wVecOpt,getxVec(xVals))
 

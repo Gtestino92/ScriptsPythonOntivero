@@ -6,7 +6,7 @@ import numpy as np
 dfs = pd.read_excel('pedidosByFormato.xlsx')
 dfs.dropna(inplace=True)
 dfs.set_index('fecha', inplace=True)
-print(dfs)
+
 
 #plt.figure(figsize=(10,4))
 #plt.plot(dfs["BSQ"])

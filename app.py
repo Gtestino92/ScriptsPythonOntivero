@@ -9,6 +9,7 @@ from pedidosMongoService import getPedidosEntregados,getListRecomOrderByProb
 from mongoConnection import mongo
 from flask_mysqldb import MySQL
 from macetasSqlService import getCodigoByTituloMlibre, getFormatoByCodigoNew
+from exceptions.singularMatException import SingularMatException
 
 def createAppOntivero(config_object='settings'):
     app = Flask(__name__)
@@ -48,19 +49,13 @@ def getCodigosRecomendacion():
         pedido = makePedidoByRequest(request)
         formatoByCodigoDict = getFormatoByCodigoNew(mysql)
         return str(getListRecomOrderByProb(pedido,formatoByCodigoDict))
+    except SingularMatException as singMatE:
+        return Response(status=singMatE.code)
     except Exception as e:
         traceback.print_tb(e.__traceback__)
         print(e)
         return Response(status=400)
 
-@app.route("/connectMySql", methods = ['GET'])
-def checkConnection():
-    formatoByCodigoDict = getFormatoByCodigoNew(mysql)
-    formatos = formatoByCodigoDict.values()
-    print(formatos)
-    print(pd.Series(list(formatos)).unique())
-    return str("")
-   
 def makePedidoByRequest(request):
     listadoMacetas = []
     for i in range(int(request.form["cantModelos"])):
