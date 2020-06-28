@@ -10,6 +10,7 @@ from mongoConnection import mongo
 from flask_mysqldb import MySQL
 from macetasSqlService import getCodigoByTituloMlibre, getFormatoByCodigoNew
 from exceptions.singularMatException import SingularMatException
+from exceptions.noPedidosRegistradosException import NoPedidosRegistradosException
 
 def createAppOntivero(config_object='settings'):
     app = Flask(__name__)
@@ -51,6 +52,8 @@ def getCodigosRecomendacion():
         return str(getListRecomOrderByProb(pedido,formatoByCodigoDict))
     except SingularMatException as singMatE:
         return Response(status=singMatE.code)
+    except NoPedidosRegistradosException as noPedidosE:
+        return Response(status=noPedidosE.code)
     except Exception as e:
         traceback.print_tb(e.__traceback__)
         print(e)

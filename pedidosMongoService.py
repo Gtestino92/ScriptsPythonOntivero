@@ -7,14 +7,16 @@ import numpy as np
 import re
 #from matplotlib import pyplot as plt
 from ml.logRegGradDesc import getProbCompraEstimation
+from exceptions.noPedidosRegistradosException import NoPedidosRegistradosException
 
 def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
     ontiveroDb = mongo.db
     pedidosCollection = ontiveroDb['pedidos']
     
     codigosConPedidosRegistrados = getCodigosConPedidos(pedidoSolicitado.listadoMacetas,pedidosCollection)
+    
     if(len(codigosConPedidosRegistrados) == 0):
-        return []
+        raise NoPedidosRegistradosException(406)
     query = {"$or": []}
     for codNew in codigosConPedidosRegistrados:
         query["$or"].append({codNew : { "$exists": True }})
@@ -33,6 +35,7 @@ def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
     hVals = getHMatrix(codigosConPedidosRegistrados,listPedidos)
 
     xVals = getXVals(pedidoSolicitado, codigosConPedidosRegistrados)
+    
 
     for i, row in dfsProbByCod.iterrows():
         i=i
@@ -47,7 +50,7 @@ def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
         probsList.append(prob)
     
     dfsProbByCod['probRec'] = pd.DataFrame(probsList)
-
+    
     ## ordeno el df y paso a lista los codigos
     dfsProbByCod.sort_values(by=['probRec'], inplace=True, ascending=False)
     return dfsProbByCod["codigoNew"].to_json(orient = "records")
