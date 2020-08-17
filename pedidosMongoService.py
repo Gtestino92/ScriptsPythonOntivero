@@ -5,7 +5,7 @@ from models.maceta import Maceta
 import pandas as pd
 import numpy as np
 import re
-#from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from ml.logRegGradDesc import getProbCompraEstimation
 from exceptions.noPedidosRegistradosException import NoPedidosRegistradosException
 
@@ -105,16 +105,15 @@ def getPedidosEntregados(formatoByCodigoDict):
     dfPedidosByFormato = getPedidosByFormato(dfPedidos, dfPedidosFecha, formatoByCodigoDict)
 
     #plt.figure(figsize=(10,4))
-    #listFormatos = pd.Series(list(formatoByCodigoDict.values())).unique()
+    listFormatos = pd.Series(list(formatoByCodigoDict.values())).unique()
     dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
 
-    dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
-
-    #for formato in listFormatos:
-    #    plt.plot(dfPedidosByTrimestre[formato])
+    dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()[:-1]
+    for formato in listFormatos:
+        plt.plot(dfPedidosByTrimestre[formato])
         
-    #plt.legend(listFormatos)
-    #plt.show()
+    plt.legend(listFormatos)
+    plt.show()
     dfPedidosByTrimestre.to_excel('pedidosByMes.xlsx')
     return dfPedidosByTrimestre.to_dict()
 
