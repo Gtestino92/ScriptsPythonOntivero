@@ -1,4 +1,4 @@
-MONGO_URI = 'mongodb+srv://ontiveroUser:federer92@cluster0-tvgnx.gcp.mongodb.net/pedidos_ontivero?retryWrites=true&w=majority'
+MONGO_URI = 'mongodb+srv://ontiveroUser:federer92@cluster0.tvgnx.mongodb.net/pedidos_ontivero?retryWrites=true&w=majority'
 MYSQL_USER = 'b9a76572e37a19'
 MYSQL_DB = 'heroku_293de090bbefa38'
 MYSQL_PASSWORD = 'e1ee1d23acb910d'
