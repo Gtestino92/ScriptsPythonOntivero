@@ -8,6 +8,7 @@ import re
 from matplotlib import pyplot as plt
 from ml.logRegGradDesc import getProbCompraEstimation
 from exceptions.noPedidosRegistradosException import NoPedidosRegistradosException
+from datetime import datetime
 
 def getListRecomOrderByProb(pedidoSolicitado, formatoByCodigoDict):
     ontiveroDb = mongo.db
@@ -106,15 +107,20 @@ def getPedidosEntregados(formatoByCodigoDict):
 
     #plt.figure(figsize=(10,4))
     listFormatos = pd.Series(list(formatoByCodigoDict.values())).unique()
-    dfPedidosByFormato.to_excel("pedidosByFormato.xlsx")
 
-    dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()[:-1]
+    dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
+    
+    #PARA SCATTER
+    #dfPedidosByTrimestre['fecha'] = dfPedidosByTrimestre.index
+    
     for formato in listFormatos:
-        plt.plot(dfPedidosByTrimestre[formato])
-        
+        if(formato in dfPedidosByTrimestre):
+            #plt.scatter(dfPedidosByTrimestre['fecha'],dfPedidosByTrimestre[formato])
+            plt.plot(dfPedidosByTrimestre[formato])
+            
     plt.legend(listFormatos)
     plt.show()
-    dfPedidosByTrimestre.to_excel('pedidosByMes.xlsx')
+    
     return dfPedidosByTrimestre.to_dict()
 
 def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
@@ -131,12 +137,12 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfAux2 = dfAux2.set_index(dfPedidosTransp.index)
     dfPedidosTransp["formato"] = dfAux2
     dfPedidosTransp["fecha"] = pd.DataFrame(rowFechas)
-    dfPedidosTransp.to_excel("transp.xlsx")
+
     dfPedidosFormato = dfPedidosTransp.groupby('formato').sum().T
     dfFechas = pd.DataFrame(rowFechas)
     dfFechas.columns = ['fecha']
     dfPedidosFormato["fecha"] = pd.to_datetime(dfFechas['fecha'], format="%d/%m/%Y")
-    dfPedidosFormato.to_excel("beforeGroupFecha.xlsx")
+
     dfPedidosFormato = dfPedidosFormato.groupby('fecha').sum()
     dfPedidosFormato.dropna(inplace=True)
     return dfPedidosFormato
@@ -147,6 +153,7 @@ def getFechas(db):
     dfPedidosInfo = pd.DataFrame(listPedidosInfo)
     dfPedidosFecha = dfPedidosInfo[['fecha_entrega','id_pedido']]
     dfPedidosFecha = dfPedidosFecha.dropna()
+    dfPedidosFecha['fecha_entrega'] = dfPedidosFecha['fecha_entrega'].apply(lambda x: datetime.strftime(x, "%d/%m/%Y"))
     dfPedidosFecha.set_index("id_pedido", inplace=True)
     dfPedidosFecha.columns=['fecha']
     return dfPedidosFecha
