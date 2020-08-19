@@ -5,7 +5,7 @@ from models.maceta import Maceta
 import pandas as pd
 import numpy as np
 import re
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 from ml.logRegGradDesc import getProbCompraEstimation
 from exceptions.noPedidosRegistradosException import NoPedidosRegistradosException
 from datetime import datetime
@@ -113,13 +113,13 @@ def getPedidosEntregados(formatoByCodigoDict):
     #PARA SCATTER
     #dfPedidosByTrimestre['fecha'] = dfPedidosByTrimestre.index
     
-    for formato in listFormatos:
-        if(formato in dfPedidosByTrimestre):
+    #for formato in listFormatos:
+    #    if(formato in dfPedidosByTrimestre):
             #plt.scatter(dfPedidosByTrimestre['fecha'],dfPedidosByTrimestre[formato])
-            plt.plot(dfPedidosByTrimestre[formato])
+            #plt.plot(dfPedidosByTrimestre[formato])
             
-    plt.legend(listFormatos)
-    plt.show()
+    #plt.legend(listFormatos)
+    #plt.show()
     
     return dfPedidosByTrimestre.to_dict()
 
