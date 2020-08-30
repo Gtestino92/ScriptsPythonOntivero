@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import numpy as np
 import datetime
 
 def makePedidosFromXlsx(file, codigosMacetasMlibre):
@@ -54,15 +55,18 @@ def makePedidosFromXlsx(file, codigosMacetasMlibre):
 
 
     ## Obtengo codigoNew de cada venta
-
-    dfs['titulo'] = dfs["Título de la publicación"].str.split("- ", n = 3, expand = True)[3]
-
+    dfTit3Aux = dfs['Título de la publicación'].str.split("- ", n = 3, expand = True)
+    
+    if(len(dfTit3Aux.columns) == 4):
+        dfs['titulo'] = dfTit3Aux[3]
+    else:
+        dfs['titulo'] = pd.DataFrame(np.nan, index = np.arange(len(dfs)), columns = ['titulo'])
+    
     serieAux = dfs.loc[dfs["titulo"].isnull(), "Título de la publicación"]
     frame = {'Título de la publicación': serieAux } 
     dfAux = pd.DataFrame(frame)
-
     dfs.loc[dfs["titulo"].isnull(), "titulo"] = dfAux["Título de la publicación"].str.split("- ", n = 2, expand = True)[2]
-    
+
     serieAux2 = dfs.loc[dfs["titulo"].isnull(), "Título de la publicación"]
     frame2 = {'Título de la publicación': serieAux2 } 
     dfAux2 = pd.DataFrame(frame2)
