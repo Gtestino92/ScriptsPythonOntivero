@@ -111,17 +111,19 @@ def getPedidosEntregados(formatoByCodigoDict):
     dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
     
     #PARA SCATTER
-    #dfPedidosByTrimestre['fecha'] = dfPedidosByTrimestre.index
+    dfPedidosByTrimestre['fechas'] = dfPedidosByTrimestre.index.strftime("%d/%m/%Y")
     
     #for formato in listFormatos:
     #    if(formato in dfPedidosByTrimestre):
             #plt.scatter(dfPedidosByTrimestre['fecha'],dfPedidosByTrimestre[formato])
-            #plt.plot(dfPedidosByTrimestre[formato])
+    #        plt.plot(dfPedidosByTrimestre[formato])
             
     #plt.legend(listFormatos)
     #plt.show()
-    
-    return dfPedidosByTrimestre.to_dict()
+    #dfPedidosByTrimestre.set_index('fechas', inplace=True)
+    #dfPedidosByTrimestreAux["fecha"]
+
+    return dfPedidosByTrimestre.to_dict(orient = "list")
 
 def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfPedidosFull = pd.merge(left=dfPedidos, right=dfPedidosFecha, how='left', left_index=True, right_index=True)
@@ -136,8 +138,7 @@ def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfAux2 = pd.DataFrame(dfAux["values"].apply(lambda x: formatDict[x]))
     dfAux2 = dfAux2.set_index(dfPedidosTransp.index)
     dfPedidosTransp["formato"] = dfAux2
-    dfPedidosTransp["fecha"] = pd.DataFrame(rowFechas)
-
+    
     dfPedidosFormato = dfPedidosTransp.groupby('formato').sum().T
     dfFechas = pd.DataFrame(rowFechas)
     dfFechas.columns = ['fecha']
