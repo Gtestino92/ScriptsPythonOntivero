@@ -110,7 +110,6 @@ def getPedidosEntregados(formatoByCodigoDict):
 
     dfPedidosByTrimestre = dfPedidosByFormato.resample('3m').sum()
     
-    #PARA SCATTER
     dfPedidosByTrimestre['fechas'] = dfPedidosByTrimestre.index.strftime("%d/%m/%Y")
     
     #for formato in listFormatos:
@@ -120,10 +119,8 @@ def getPedidosEntregados(formatoByCodigoDict):
             
     #plt.legend(listFormatos)
     #plt.show()
-    #dfPedidosByTrimestre.set_index('fechas', inplace=True)
-    #dfPedidosByTrimestreAux["fecha"]
 
-    return dfPedidosByTrimestre.to_dict(orient = "list")
+    return str(dfPedidosByTrimestre.to_dict(orient = "list")).replace("\'","\"").replace(".0","")
 
 def getPedidosByFormato(dfPedidos, dfPedidosFecha, formatDict):
     dfPedidosFull = pd.merge(left=dfPedidos, right=dfPedidosFecha, how='left', left_index=True, right_index=True)
