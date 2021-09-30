@@ -8,6 +8,9 @@ from getPedidosFromXlsx import makePedidosFromXlsx
 from pedidosMongoService import getPedidosEntregados,getListRecomOrderByProb
 from mongoConnection import mongo
 from flask_mysqldb import MySQL
+import jwt
+import datetime
+from functools import wraps
 from macetasSqlService import getCodigoByTituloMlibre, getFormatoByCodigoNew
 from exceptions.singularMatException import SingularMatException
 from exceptions.noPedidosRegistradosException import NoPedidosRegistradosException
@@ -20,6 +23,28 @@ def createAppOntivero(config_object='settings'):
 
 app = createAppOntivero()
 mysql = MySQL(app)
+private_key = open(app.config['PRIVATE_KEY_URI']).read()
+public_key = open(app.config['PUBLIC_KEY_URI']).read()
+
+def token_verif(f):
+    @wraps(f)
+    def wrapped(*args, **kwargs):
+        
+        if 'access-token' in request.headers:
+            token = request.headers['access-token']
+        else:
+            return jsonify({'message' : 'No se encontró el Token'}), 403
+        
+        try:
+            data = jwt.decode(token, public_key)
+        except:
+            return jsonify({'message' : 'Token inválido'}), 403  
+        
+        if(data['id'] != 'gtestino92'):
+            return jsonify({'message' : 'Usuario no encontrado'}), 404
+        
+        return f(*args, **kwargs)
+    return wrapped
 
 @app.route("/pedidosEntregadosML", methods = ['POST'])
 def pedidosEntregadosML():
@@ -34,6 +59,7 @@ def pedidosEntregadosML():
         return Response(status=400)
 
 @app.route("/getPedidosEntregadosDb", methods = ['GET'])
+@token_verif
 def getPedidosEntregadosDb():
     try:
         formatoByCodigoDict = getFormatoByCodigoNew(mysql)
@@ -58,6 +84,12 @@ def getCodigosRecomendacion():
         traceback.print_tb(e.__traceback__)
         print(e)
         return Response(status=400)
+
+@app.route("/getToken", methods = ['GET'])
+def getToken():
+    idUser = request.args.get('id')
+    token = jwt.encode({'id' : idUser, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=1)}, private_key, algorithm='RS256')
+    return jsonify({'token' : token.decode('UTF-8')})
 
 def makePedidoByRequest(request):
     listadoMacetas = []
