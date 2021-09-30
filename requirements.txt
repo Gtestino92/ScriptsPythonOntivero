@@ -38,3 +38,4 @@ virtualenv-clone==0.5.4
 wrapt==1.11.2
 xlrd==1.2.0
 pyjwt==2.1.0
+cryptography 
