@@ -25,7 +25,7 @@ mysqlclient==1.4.6
 numpy==1.18.2
 openpyxl==3.0.3
 pandas==1.0.3
-pipenv==2020.6.2
+pipenv==2022.1.8
 pylint==2.4.4
 pymongo==3.10.1
 pyparsing==2.4.7
